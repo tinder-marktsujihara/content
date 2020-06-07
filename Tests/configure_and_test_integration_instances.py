@@ -689,7 +689,6 @@ def main():
             client = demisto_client.configure(base_url=server, username=username, password=password,
                                               verify_ssl=False)
             set_marketplace_gcp_bucket_for_build(client, prints_manager, branch_name, ci_build_number)
-            sleep(10)
             print('Restarting servers to apply GCS server config ...')
             ssh_string = 'ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null {}@{} ' \
                          '"sudo systemctl restart demisto"'
@@ -724,6 +723,13 @@ def main():
     new_integrations_names, modified_integrations_names = [], []
 
     installed_content_packs_successfully = True
+
+    prints_manager.add_print_job('sleeping for 300 secs...', print_warning, 0)
+    prints_manager.execute_thread_prints(0)
+    sleep(300)
+    prints_manager.add_print_job('sleeping ended.', print_warning, 0)
+    prints_manager.execute_thread_prints(0)
+
 
     if LooseVersion(server_numeric_version) >= LooseVersion('6.0.0'):
         pack_ids = get_pack_ids_to_install()
