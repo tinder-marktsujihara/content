@@ -1268,7 +1268,7 @@ class TestBaseClient:
     ]
 
     @pytest.mark.parametrize('method', RETRIES_POSITIVE_TEST)
-    def test_http_requests_with_retry_sanity(self, method):
+    def test_http_requests_with_retry_sanity(self, method, requests_mock):
         """
             Given
             - A base client
@@ -1279,13 +1279,19 @@ class TestBaseClient:
             Then
             -  Ensure a successful request return response as expected
         """
+        action = {
+            'get': requests_mock.get,
+            'post': requests_mock.post,
+            'put': requests_mock.put
+        }
+        action[method]('http://httpbin.org/{}'.format(method), text=json.dumps(self.text))
         url = 'http://httpbin.org/{}'.format(method)
         res = self.client._http_request(method,
                                         '',
                                         full_url=url,
                                         retries=1,
                                         status_list_to_retry=[401])
-        assert res['url'] == url
+        assert res['status'] == 'ok'
 
     def test_http_request_json(self, requests_mock):
         requests_mock.get('http://example.com/api/v2/event', text=json.dumps(self.text))
