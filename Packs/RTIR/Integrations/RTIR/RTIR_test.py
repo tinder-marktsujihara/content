@@ -90,3 +90,41 @@ def test_parse_ticket_links():
     response = parse_ticket_links(RAW_LINKS)
     expected = [{'ID': '65461'}, {'ID': '65462'}, {'ID': '65463'}]
     assert response == expected
+
+
+RAW_ATTACHMENTS_LIST = """
+RT/4.4.2 200 Ok
+
+id: ticket/6325/attachments
+Attachments: 504: mimecast-get-remediation-incident.log (text/plain / 3.5k)
+505: mimecast-get-remediation-incident2.log (text/plain / 3.6k)"""
+
+
+def test_parse_attachments_list():
+    from RTIR import parse_attachments_list
+    response = parse_attachments_list(RAW_ATTACHMENTS_LIST)
+    expected = [('504', 'mimecast-get-remediation-incident.log', 'text/plain', '3.5k'),
+                ('505', 'mimecast-get-remediation-incident2.log', 'text/plain', '3.6k')]
+    assert response == expected
+
+
+RAW_ATTACHMENT_CONTENT = """From: root@localhost
+Subject: <ticket subject>
+X-RT-Interface: REST
+Content-Type: text/plain
+Content-Disposition: form-data;
+name="attachment_1";
+filename="mimecast-get-remediation-incident.log";
+filename="mimecast-get-remediation-incident.log"
+Content-Transfer-Encoding: binary
+Content-Length: <length of the content>
+
+Content: some multiline
+attachment content"""
+
+
+def test_parse_attachment_content():
+    from RTIR import parse_attachment_content
+    response = parse_attachment_content(RAW_ATTACHMENT_CONTENT)
+    expected = 'some multiline\nattachment content'
+    assert response == expected
