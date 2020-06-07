@@ -724,6 +724,8 @@ def main():
 
     installed_content_packs_successfully = True
 
+    sleep(10)
+
     if LooseVersion(server_numeric_version) >= LooseVersion('6.0.0'):
         pack_ids = get_pack_ids_to_install()
         # install content packs in every server
