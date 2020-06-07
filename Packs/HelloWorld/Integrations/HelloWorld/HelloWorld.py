@@ -1,5 +1,6 @@
 """HelloWorld Integration for Cortex XSOAR (aka Demisto)
 
+
 This integration is a good example on you can build a Cortex XSOAR Integration
 using Python 3. Please follow the documentation links below and make sure that
 your integration follows the Code Conventions and passes the Linting phase.
