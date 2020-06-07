@@ -5,6 +5,7 @@ import ast
 import json
 import demisto_client
 from threading import Thread, Lock
+from distutils.version import LooseVersion
 from demisto_sdk.commands.common.tools import print_color, LOG_COLORS, run_threads_list
 from Tests.Marketplace.marketplace_services import PACKS_FULL_PATH, IGNORED_FILES
 
@@ -32,6 +33,10 @@ def get_pack_data_from_results(search_results, pack_display_name):
     return {}
 
 
+def is_dependency_installed_and_updated(min_version, current_version):
+    return current_version and LooseVersion(current_version) >= LooseVersion(min_version)
+
+
 def create_dependencies_data_structure(response_data, dependants_ids, dependencies_data, checked_packs):
     """ Recursively creates the packs' dependencies data structure for the installation requests
     (only required and uninstalled).
@@ -47,15 +52,20 @@ def create_dependencies_data_structure(response_data, dependants_ids, dependenci
 
     for dependency in response_data:
         dependants = dependency.get('dependants', {})
-        for dependant in dependants.keys():
-            is_required = dependants[dependant].get('level', '') == 'required'
-            if dependant in dependants_ids and is_required and dependency.get('id') not in checked_packs:
-                dependencies_data.append({
-                    'id': dependency.get('id'),
-                    'version': dependency.get('extras', {}).get('pack', {}).get('currentVersion')
-                })
-                next_call_dependants_ids.append(dependency.get('id'))
-                checked_packs.append(dependency.get('id'))
+        for dependant_id, dependant_info in dependants.items():
+            is_required = dependant_info.get('level', '') == 'required'
+            if is_required:
+                is_installed_and_updated = is_dependency_installed_and_updated(dependant_info.get('minVersion'),
+                                                                               dependency.get('currentVersion'))
+                if not is_installed_and_updated:
+                    if dependant_id in dependants_ids and dependency.get('id') not in checked_packs:
+                        dependencies_data.append({
+                            'id': dependency.get('id'),
+                            'version': dependency.get('currentVersion')
+                        })
+                        next_call_dependants_ids.append(dependency.get('id'))
+                        checked_packs.append(dependency.get('id'))
+                        break
 
     if next_call_dependants_ids:
         create_dependencies_data_structure(response_data, next_call_dependants_ids, dependencies_data, checked_packs)
