@@ -99,7 +99,7 @@ def get_pack_dependencies(client, prints_manager, pack_data):
             dependants_ids = [pack_id]
             reseponse_data = ast.literal_eval(response_data).get('dependencies', [])
             create_dependencies_data_structure(reseponse_data, dependants_ids, dependencies_data, dependants_ids)
-            dependencies_str = ', '.join([dep['id'] for dep in dependencies_data])
+            dependencies_str = ', '.join([f'{dep["id"]} v{dep["version"]}' for dep in dependencies_data])
             if dependencies_data:
                 message = 'Found the following dependencies for pack {}:\n{}\n'.format(pack_id, dependencies_str)
                 prints_manager.add_print_job(message, print_color, 0, LOG_COLORS.GREEN)
