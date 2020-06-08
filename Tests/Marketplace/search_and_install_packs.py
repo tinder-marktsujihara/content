@@ -34,7 +34,9 @@ def get_pack_data_from_results(search_results, pack_display_name):
 
 
 def is_dependency_installed_and_updated(min_version, current_version):
-    return current_version and LooseVersion(current_version) >= LooseVersion(min_version)
+    if not current_version or LooseVersion(current_version) < LooseVersion(min_version):
+        return False
+    return True
 
 
 def create_dependencies_data_structure(response_data, dependants_ids, dependencies_data, checked_packs):
@@ -61,7 +63,7 @@ def create_dependencies_data_structure(response_data, dependants_ids, dependenci
                     if dependant_id in dependants_ids and dependency.get('id') not in checked_packs:
                         dependencies_data.append({
                             'id': dependency.get('id'),
-                            'version': dependency.get('currentVersion')
+                            'version': dependency.get('extras', {}).get('pack', {}).get('currentVersion')
                         })
                         next_call_dependants_ids.append(dependency.get('id'))
                         checked_packs.append(dependency.get('id'))
