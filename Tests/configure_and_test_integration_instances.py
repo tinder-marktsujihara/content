@@ -15,8 +15,7 @@ import demisto_client
 from demisto_sdk.commands.common.tools import print_error, print_warning, print_color, LOG_COLORS, run_threads_list, \
     run_command, get_last_release_version, checked_type, get_yaml, str2bool, server_version_compare
 from demisto_sdk.commands.validate.file_validator import FilesValidator
-from demisto_sdk.commands.common.constants import YML_INTEGRATION_REGEXES, INTEGRATION_REGEX, PACKS_INTEGRATION_REGEX, \
-    BETA_INTEGRATION_REGEX, RUN_ALL_TESTS_FORMAT
+from demisto_sdk.commands.common.constants import YML_INTEGRATION_REGEXES, RUN_ALL_TESTS_FORMAT
 
 from Tests.test_integration import __get_integration_config, __test_integration_instance, \
     __disable_integrations_instances
@@ -198,7 +197,6 @@ def get_new_and_modified_integration_files(git_sha1):
     change_log = run_command('git diff --name-status {}'.format(git_sha1))
     modified_files, added_files, _, _ = file_validator.get_modified_files(change_log, tag)
     all_integration_regexes = YML_INTEGRATION_REGEXES
-    all_integration_regexes.extend([INTEGRATION_REGEX, PACKS_INTEGRATION_REGEX, BETA_INTEGRATION_REGEX])
 
     new_integration_files = [
         file_path for file_path in added_files if checked_type(file_path, all_integration_regexes)
